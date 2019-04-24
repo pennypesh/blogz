@@ -17,6 +17,11 @@ def new_post():
     return render_template('new-blog.html')
 
 
+@app.route('/blog',methods=['POST','GET'])
+def main_blog():
+    return render_template('main-blog-page.html')
+
+
     
 if __name__ == '__main__':
     app.run()
