@@ -16,9 +16,15 @@ class Blog(db.Model):
         self.title = title
         self.body = body
 
+@app.route('/blog',methods=['POST','GET'])
+def index():
+    blogs = Blog.query.all()
+
+    return render_template('main-blog-page.html',bloglist=blogs)
+
 
 @app.route('/newpost', methods=['POST','GET'])
-def new_post():
+def new_blog():
     title_error=''
     body_error=''
     title = ''
@@ -32,7 +38,7 @@ def new_post():
             title_error="Please fill in the title"
         if body=='':
             body_error="Please fill in the body"
-    if request.method=='POST' and not title_error and body_error:
+    if request.method=='POST' and not title_error and not body_error:
         new_entry=Blog(title,body)
         db.session.add(new_entry)
         db.session.commit()
@@ -44,17 +50,11 @@ def new_post():
         return render_template('new-blog.html',title_error=title_error,body_error=body_error)
 
 
-@app.route('/blog',methods=['POST','GET'])
-def main_blog():
-    blogs = Blog.query.all()
-
-    return render_template('main-blog-page.html',bloglist=blogs)
-
-@app.route('/blog',methods=['POST','GET'])
+@app.route('/new-entry',methods=['POST','GET'])
 def new_entry():
-    id=request.arg['id']
+    id=request.arg.get['id']
     blog=Blog.query.filter_by(id=id).first()
-    return render_template('new_entry.html',blog=blog)
+    return render_template('blog.html',blog=blog)
 
 
     
