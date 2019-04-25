@@ -50,6 +50,12 @@ def main_blog():
 
     return render_template('main-blog-page.html',bloglist=blogs)
 
+@app.route('/blog',methods=['POST','GET'])
+def new_entry():
+    id=request.arg['id']
+    blog=Blog.query.filter_by(id=id).first()
+    return render_template('new_entry.html',blog=blog)
+
 
     
 if __name__ == '__main__':
