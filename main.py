@@ -47,14 +47,14 @@ def new_blog():
 
         return render_template('main-blog-page.html',bloglist=blogs)
     else:
-        return render_template('new-blog.html',title_error=title_error,body_error=body_error)
+        return render_template('new-blog.html',title_error=title_error,body_error=body_error, blog_title=title, blog_body=body)
 
 
 @app.route('/new-entry',methods=['POST','GET'])
 def new_entry():
-    id=request.arg.get['id']
+    id=request.args.get('id')
     blog=Blog.query.filter_by(id=id).first()
-    return render_template('blog.html',blog=blog)
+    return render_template('new-entry.html',blog=blog)
 
 
     
