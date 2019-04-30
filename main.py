@@ -6,12 +6,13 @@ app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:Ethan061616@localhost:3306/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
+app.secret_key='penny'
 
 class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120))
     body = db.Column(db.String(1500))
-    owner=db.Column(db.Integer,db.ForeignKey('user.id'))
+    owner_id=db.Column(db.Integer,db.ForeignKey('user.id'))
 
     def __init__(self, title, body,owner):
         self.title = title
@@ -27,6 +28,18 @@ class User(db.Model):
     def __init__(self, username, password):
         self.username = username
         self.password = password
+
+
+@app.before_request
+def require_login():
+    allowed_routes=['login','signup']
+    if request.endpoint not in allowed_routes and 'username' not in session:
+        return redirect('/login')
+
+@app.route('/login',methods=['POST','GET'])
+def login():
+
+    return render_template('login.html')
 
 @app.route('/blog',methods=['POST','GET'])
 def index():
@@ -74,6 +87,9 @@ def signup():
     user_error=''
     password_error=''
     verify_error=''
+    existing_username=''
+    username=''
+    password=''
     
     if request.method =='POST':
         username = request.form['username']
@@ -108,21 +124,19 @@ def signup():
             verify = ''
   
     #without errors
-        if not user_error and not password_error and not verify_error:
+    if not user_error and not password_error and not verify_error:
             if not existing_username:
                 new_user = User(username,password)
                 db.session.add(new_user)
                 db.session.commit()
                 session['user']= new_user.username
-                return redirect('/newpost')                
-            else:
-                user_error ="username already exist"
+            return redirect('/newpost')                
+    else:
+            user_error ="username already exist"
 
-    return render_template('signup.hml',user_error = user_error,password_error = password_error, verify_error=verify_error)
+            return render_template('signup.hml',user_error = user_error,password_error = password_error, verify_error=verify_error)
 
-@app.route('/login',methods=['POST','GET'])
-def login():
-    return render_template(login.html)
+
 
 @app.route('/index_2',methods=['POST','GET'])
 def index_2():
