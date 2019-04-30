@@ -41,6 +41,13 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/logout',methods=['POST','GET'])
+def logout():
+    del session['session']
+    return redirect('login.html')
+    
+
+
 @app.route('/blog',methods=['POST','GET'])
 def index():
     blogs = Blog.query.all()
@@ -69,9 +76,9 @@ def new_blog():
         db.session.add(new_entry)
         db.session.commit()
 
-        #blogs = Blog.query.all()
-        return redirect('/blog?id={0}'.format(new_entry.id))
-        #return render_template('main-blog-page.html',bloglist=blogs)
+        blogs = Blog.query.all()
+        #return redirect('/blog?id={0}'.format(new_entry.id))
+        return render_template('main-blog-page.html',bloglist=blogs)
     else:
         return render_template('new-blog.html',title_error=title_error,body_error=body_error, blog_title=title, blog_body=body)
 
@@ -124,7 +131,7 @@ def signup():
             verify = ''
   
     #without errors
-    if not user_error and not password_error and not verify_error:
+    if request.method==['POST'] and not user_error and not password_error and not verify_error:
             if not existing_username:
                 new_user = User(username,password)
                 db.session.add(new_user)
@@ -134,7 +141,7 @@ def signup():
     else:
             user_error ="username already exist"
 
-            return render_template('signup.hml',user_error = user_error,password_error = password_error, verify_error=verify_error)
+            return render_template('signup.html',user_error = user_error,password_error = password_error, verify_error=verify_error)
 
 
 
