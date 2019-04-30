@@ -39,7 +39,22 @@ def require_login():
 @app.route('/login',methods=['POST','GET'])
 def login():
 
-    return render_template('login.html')
+    username=''
+
+    if request.method==['POST']:
+        username=request.form['username']
+        password=request.form['password']
+
+        usertologin = User.query.filter_by(username=username).first()
+    #Validate password and user
+    #new_user.password not in db throw error
+
+        session['username']= username
+     #Validate password and user
+        return redirect('/signup')
+    
+    else:
+        return render_template('login.html')
 
 @app.route('/logout',methods=['POST','GET'])
 def logout():
@@ -131,15 +146,15 @@ def signup():
             verify = ''
   
     #without errors
-    if request.method==['POST'] and not user_error and not password_error and not verify_error:
+    if request.method == 'POST' and not user_error and not password_error and not verify_error:
             if not existing_username:
                 new_user = User(username,password)
                 db.session.add(new_user)
                 db.session.commit()
                 session['user']= new_user.username
-            return redirect('/newpost')                
+            return redirect('/new-entry')                
     else:
-            user_error ="username already exist"
+            #user_error ="username already exist"
 
             return render_template('signup.html',user_error = user_error,password_error = password_error, verify_error=verify_error)
 
