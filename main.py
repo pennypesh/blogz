@@ -38,23 +38,40 @@ def require_login():
 
 @app.route('/login',methods=['POST','GET'])
 def login():
+    username=""
+    user_error=""
+    password_error=""
 
-    username=''
-
-    if request.method==['POST']:
+    if request.method=='POST':
         username=request.form['username']
         password=request.form['password']
+        user = User.query.filter_by(username=username).first()
 
-        usertologin = User.query.filter_by(username=username).first()
+        if not user:
+            user_error = "invalid username"
+            if username == "":
+                user_error = "please enter your name "
+
+        if password =="":
+            password_error = "please enter your password"
+
+        if user and user.password != password:
+            password_error = "Enter a valid password"
+
+
+        if username and user.password == password:
+            session['username'] = username
+            
+
     #Validate password and user
     #new_user.password not in db throw error
 
         session['username']= username
      #Validate password and user
-        return redirect('/signup')
+        return redirect('/newpost')
     
     else:
-        return render_template('login.html')
+        return render_template('login.html',username = username,username_error = user_error,password_error = password_error)
 
 @app.route('/logout',methods=['POST','GET'])
 def logout():
@@ -76,7 +93,7 @@ def new_blog():
     body_error=''
     title = ''
     body = ''
-    owner = User.query.filter_by(Username=session['username']).first()
+    owner = User.query.filter_by(username=session['username']).first()
     
     if request.method == 'POST':
         title = request.form['blog_title']
@@ -106,11 +123,11 @@ def new_entry():
 
 @app.route('/signup',methods=['POST','GET'])
 def signup():
+    username=''
     user_error=''
     password_error=''
     verify_error=''
-    existing_username=''
-    username=''
+    existing_username=''   
     password=''
     
     if request.method =='POST':
@@ -151,12 +168,12 @@ def signup():
                 new_user = User(username,password)
                 db.session.add(new_user)
                 db.session.commit()
-                session['user']= new_user.username
-            return redirect('/new-entry')                
+                session['username']= new_user.username
+            return redirect('/newpost')                
     else:
             #user_error ="username already exist"
 
-            return render_template('signup.html',user_error = user_error,password_error = password_error, verify_error=verify_error)
+     return render_template('signup.html',user_error = user_error,password_error = password_error, verify_error=verify_error)
 
 
 
