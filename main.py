@@ -32,7 +32,7 @@ class User(db.Model):
 
 @app.before_request
 def require_login():
-    allowed_routes=['login','signup']
+    allowed_routes=['login','signup','blog']
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
 
@@ -49,9 +49,8 @@ def login():
 
         if not user:
             user_error = "invalid username"
-            if username == "":
-                user_error = "please enter your name "
-
+        if username =='':
+            user_error="Please enter a valid username"
         if password =="":
             password_error = "please enter your password"
 
@@ -59,23 +58,23 @@ def login():
             password_error = "Enter a valid password"
 
 
-        if username and user.password == password:
-            session['username'] = username
+    if request.method=='POST' and username and user.password == password:
+        session['username'] = username
             
 
     #Validate password and user
     #new_user.password not in db throw error
 
-        session['username']= username
+        #ession['username']= username
      #Validate password and user
         return redirect('/newpost')
     
     else:
         return render_template('login.html',username = username,username_error = user_error,password_error = password_error)
 
-@app.route('/logout',methods=['POST','GET'])
+@app.route('/logout')
 def logout():
-    del session['session']
+    del session['username']
     return redirect('login.html')
     
 
