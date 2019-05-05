@@ -32,9 +32,15 @@ class User(db.Model):
 
 @app.before_request
 def require_login():
-    allowed_routes=['login','signup','blog']
+    allowed_routes=['login','signup','index','main']
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
+
+@app.route('/index',methods=['POST','GET'])
+def index():
+    users =User.query
+    return render_template(index.html,users=users)
+
 
 @app.route('/login',methods=['POST','GET'])
 def login():
@@ -72,17 +78,14 @@ def login():
     else:
         return render_template('login.html',username = username,username_error = user_error,password_error = password_error)
 
-@app.route('/logout')
-def logout():
-    del session['username']
-    return redirect('login.html')
-    
 
-
-@app.route('/blog',methods=['POST','GET'])
-def index():
+@app.route('/singleUser')
+def main_blog_page():
+    postid=request.args.get('user')
+    if postid:
+        blogs=Blog.query.filter_by(owner_id=postid).all()
+        return render_template('main_blog_page',bloglist=blogs)
     blogs = Blog.query.all()
-
     return render_template('main-blog-page.html',bloglist=blogs)
 
 
@@ -114,11 +117,11 @@ def new_blog():
         return render_template('new-blog.html',title_error=title_error,body_error=body_error, blog_title=title, blog_body=body)
 
 
-@app.route('/new-entry',methods=['POST','GET'])
+@app.route('/blogentry',methods=['POST','GET'])
 def new_entry():
     id=request.args.get('id')
     blog=Blog.query.filter_by(id=id).first()
-    return render_template('new-entry.html',blog=blog)
+    return render_template('singleUser.html',blog=blog)
 
 @app.route('/signup',methods=['POST','GET'])
 def signup():
@@ -176,10 +179,11 @@ def signup():
 
 
 
-@app.route('/index_2',methods=['POST','GET'])
-def index_2():
-    return render_template(index_2.html)
-
+@app.route('/logout')
+def logout():
+    del session['username']
+    return redirect('login.html')
+    
 
 
 
