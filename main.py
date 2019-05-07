@@ -36,10 +36,10 @@ def require_login():
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
 
-@app.route('/index',methods=['POST','GET'])
+@app.route('/',methods=['POST','GET'])
 def index():
-    users =User.query
-    return render_template(index.html,users=users)
+    users =User.query.all()
+    return render_template('index.html',users=users,title="Authors")
 
 
 @app.route('/login',methods=['POST','GET'])
@@ -79,12 +79,12 @@ def login():
         return render_template('login.html',username = username,username_error = user_error,password_error = password_error)
 
 
-@app.route('/singleUser')
+@app.route('/blog')
 def main_blog_page():
-    postid=request.args.get('user')
+    postid=request.args.get('id')
     if postid:
-        blogs=Blog.query.filter_by(owner_id=postid).all()
-        return render_template('main_blog_page',bloglist=blogs)
+        blogs=Blog.query.filter_by(owner_id=postid).first()
+        return render_template('main-blog-page.html',bloglist=blogs)
     blogs = Blog.query.all()
     return render_template('main-blog-page.html',bloglist=blogs)
 
@@ -110,14 +110,19 @@ def new_blog():
         db.session.add(new_entry)
         db.session.commit()
 
-        blogs = Blog.query.all()
-        #return redirect('/blog?id={0}'.format(new_entry.id))
-        return render_template('main-blog-page.html',bloglist=blogs)
+        #blogs = Blog.query.all()
+        #id = str(new_entry)
+        # return redirect('/blog?id={0}'.format(new_entry.id))
+        return redirect("/blog?id=" + id) #render_template('singleUser.html',bloglist=blogs)
+
+        
+		
+	    
     else:
         return render_template('new-blog.html',title_error=title_error,body_error=body_error, blog_title=title, blog_body=body)
 
 
-@app.route('/blogentry',methods=['POST','GET'])
+@app.route('/new-entry',methods=['POST','GET'])
 def new_entry():
     id=request.args.get('id')
     blog=Blog.query.filter_by(id=id).first()
