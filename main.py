@@ -67,12 +67,6 @@ def login():
     if request.method=='POST' and username and user.password == password:
         session['username'] = username
             
-
-    #Validate password and user
-    #new_user.password not in db throw error
-
-        #ession['username']= username
-     #Validate password and user
         return redirect('/newpost')
     
     else:
@@ -81,10 +75,15 @@ def login():
 
 @app.route('/blog')
 def main_blog_page():
-    postid=request.args.get('id')
+    postid=request.args.get('user')
+    blogId=request.args.get('id')
+
     if postid:
-        blogs=Blog.query.filter_by(owner_id=postid).first()
+        blogs=Blog.query.filter_by(owner_id=postid).all()
         return render_template('main-blog-page.html',bloglist=blogs)
+    if blogId:
+        blog=Blog.query.filter_by(id=blogId).first()
+        return render_template('singleUser.html', blog=blog)
     blogs = Blog.query.all()
     return render_template('main-blog-page.html',bloglist=blogs)
 
@@ -106,27 +105,17 @@ def new_blog():
         if body=='':
             body_error="Please fill in the body"
     if request.method=='POST' and not title_error and not body_error:
+        username=session['username']
+        owner=User.query.filter_by(username=username).first()
         new_entry=Blog(title,body,owner)
         db.session.add(new_entry)
         db.session.commit()
-
-        #blogs = Blog.query.all()
-        #id = str(new_entry)
-        # return redirect('/blog?id={0}'.format(new_entry.id))
-        return redirect("/blog?id=" + id) #render_template('singleUser.html',bloglist=blogs)
-
-        
-		
-	    
+        if new_entry.id:
+            blog=Blog.query.filter_by(id=new_entry.id).first()
+            return render_template('singleUser.html', blog=blog)
+        	    
     else:
         return render_template('new-blog.html',title_error=title_error,body_error=body_error, blog_title=title, blog_body=body)
-
-
-@app.route('/new-entry',methods=['POST','GET'])
-def new_entry():
-    id=request.args.get('id')
-    blog=Blog.query.filter_by(id=id).first()
-    return render_template('singleUser.html',blog=blog)
 
 @app.route('/signup',methods=['POST','GET'])
 def signup():
@@ -183,15 +172,11 @@ def signup():
      return render_template('signup.html',user_error = user_error,password_error = password_error, verify_error=verify_error)
 
 
-
 @app.route('/logout')
 def logout():
     del session['username']
     return redirect('login.html')
     
-
-
-
     
 if __name__ == '__main__':
     app.run()
